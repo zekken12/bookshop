@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+        <?php
+        $servername="localhost";
+        $username="root";
+        $password="root";
+        $dbname="gestionpersonne";
+        $conn= mysqli_connect($servername, $username, $password, $dbname);
+                if(!$conn){
+                    //La fonction mysqli_connect_error() permet de retourner l'erreur de connexion
+                    echo "Echec de la connexion: " .mysqli_connect_error();
+                }
+                if(!empty($_GET["id"])){
+                    //Supprimer le livre dont l'id est envoyé avec l'URL
+                    $ids= mysqli_real_escape_string($conn, $_GET["id"]);
+                    $sql = "DELETE FROM livre WHERE id=$ids";
+                    if(mysqli_query($conn, $sql)){
+                        $message="Le livre a été supprimé avec succès";
+                    } else {
+                        //La fonction mysqli_error() permet de savoir l'erreur
+                        $message="Erreur pendant la suppression du livre: " .mysqli_errno($conn);
+                    }
+                    header("Location:ajout_livre.php?message=$message");
+                }
+        ?>
+    </body>
+</html>

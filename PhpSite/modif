@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+        <?php
+        $servername = "localhost";
+        $username = "root";
+        $password = "root";
+        $dbname = "gestionpersonne";
+        
+        //Création de la connexion
+        $conn = mysqli_connect($servername, $username, $password, $dbname);
+        //Tester la connexion
+        if (!$conn){
+            echo "Echec de connexion";
+        }
+        //Après appel de la page on récupère l'id du livre en question
+        if(isset($_GET["id"])){
+            //Protection des données
+            $idm = mysqli_real_escape_string($conn,$_GET["id"]);
+            $sql = "SELECT * FROM livre WHERE id=$idm";
+            $result = mysqli_query($conn, $sql);
+            if (mysqli_num_rows($result)>0){
+                //Récupérer des informations du livre en question qui seront par la suite
+                $row = mysqli_fetch_assoc($result);
+                $id=$row["id"];
+                $titre=$row["titre"];
+                $auteur=$row["auteur"];
+                $date=$row["date_creation"];
+            }
+            else{
+                //Si erreur envoie de message à la page ajout_livre.php
+                $message="Le livre est introuvable";
+                header("Location:ajout_livre.php?message=$message");
+            }
+        }
+        //Après clic sur le bouton modifier on récupère les données envoyées par la m
+        if(isset($_POST["titre"]) && isset($_POST["auteur"]) && isset($_POST["date"])){
+            $titre=mysqli_real_escape_string($conn,$_POST["titre"]);
+            $auteur= mysqli_real_escape_string($conn, $_POST["auteur"]);
+            $date= mysqli_real_escape_string($conn, $_POST["date"]);
+            $id= mysqli_real_escape_string($conn, $_POST["id"]);
+            if(preg_match("#^[A-Z]([A-Za-z])+$#", $titre)){
+                $sql="Update livre set titre='$titre', auteur='$auteur', date_creation='$date'
+                WHERE id=$id";
+                //Exécuter la requête de l'update  et redirection vers la page ajout_livre.php
+                if(mysqli_query($conn,$sql)){
+                    $message="Le livre a été mis à jour avec succès";
+                } else {
+                    $message="Erreur de mise à jour";
+                }
+                header("Location:ajout_livre.php?message=$message");
+            }
+                else
+                    echo "<p style='color:red'>Le titre n'est pas valide </p>";
+            }
+        ?>
+        <!--Afficher le formulaire rempli par les données du livre récupéré en haut. -->
+        <form name="exe" action="modif.php" method="post">
+            <fieldset>
+                <legend>Modifier un livre</legend>
+                <input type="hidden" id="id" name="id" value="<?php if(isset($id)) {echo $id; }?>"></br>
+                <label for="titre">Titre du livre</label>
+                <input type="text" id="titre" name="titre" required value="<?php if(isset($titre)) {echo $titre; }?>"></br>
+                <label for="auteur">Auteur du livre</label>
+                <input type="text" id="auteur" name="auteur" required value="<?php if(isset($auteur)) {echo $auteur; }?>"></br>
+                <label for="date">Date de création</label>
+                <input type="date" id="date" name="date" required value="<?php if(isset($date)) {echo $date; }?>"></br>
+                <input type="submit" value="Modifier">
+            </fieldset>
+        </form>
+    </body>
+</html>
